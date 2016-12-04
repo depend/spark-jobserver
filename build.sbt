@@ -114,25 +114,32 @@ lazy val dockerSettings = Seq(
     val artifact = (assemblyOutputPath in assembly in jobServerExtras).value
     val artifactTargetPath = s"/app/${artifact.name}"
 
-    val sparkBuild = s"spark-$sparkVersion"
-    val sparkBuildCmd = scalaBinaryVersion.value match {
-      case "2.11" =>
-        "./make-distribution.sh -Dscala-2.11 -Phadoop-2.7 -Phive"
-      case other => throw new RuntimeException(s"Scala version $other is not supported!")
-    }
-
+//    val sparkBuild = s"spark-$sparkVersion"
+//    val sparkBuildCmd = scalaBinaryVersion.value match {
+//      case "2.11" =>
+//        "./make-distribution.sh -Dscala-2.11 -Phadoop-2.7 -Phive"
+//      case other => throw new RuntimeException(s"Scala version $other is not supported!")
+//    }
+    val sparkDist:File = file(sys.env("SPARK_DIST"))
     new sbtdocker.mutable.Dockerfile {
-      from(s"java:$javaVersion")
+//      from(s"java:$javaVersion")
+      from(s"depend/docker-centos-jre:${javaVersion}")
       // Dockerfile best practices: https://docs.docker.com/articles/dockerfile_best-practices/
       expose(8090)
       expose(9999)    // for JMX
       env("MESOS_VERSION", mesosVersion)
-      runRaw("""echo "deb http://repos.mesosphere.io/ubuntu/ trusty main" > /etc/apt/sources.list.d/mesosphere.list && \
-                apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF && \
-                apt-get -y update && \
-                apt-get -y install mesos=${MESOS_VERSION} && \
-                apt-get clean
+//      runRaw("""echo "deb http://repos.mesosphere.io/ubuntu/ trusty main" > /etc/apt/sources.list.d/mesosphere.list && \
+//                apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF && \
+//                apt-get -y update && \
+//                apt-get -y install mesos=${MESOS_VERSION} && \
+//                apt-get clean
+//             """)
+      runRaw("""yum install -y ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home:/kalyaka/CentOS_CentOS-6/x86_64/libevent2-2.0.21-11.1.x86_64.rpm && \
+                yum install -y ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home:/kalyaka/CentOS_CentOS-6/x86_64/libevent2-devel-2.0.21-11.1.x86_64.rpm && \
+                rpm -Uvh http://repos.mesosphere.com/el/6/noarch/RPMS/mesosphere-el-repo-6-2.noarch.rpm && \
+                yum -y install mesos-${MESOS_VERSION}
              """)
+      workDir("/")
       copy(artifact, artifactTargetPath)
       copy(baseDirectory(_ / "bin" / "server_start.sh").value, file("app/server_start.sh"))
       copy(baseDirectory(_ / "bin" / "server_stop.sh").value, file("app/server_stop.sh"))
@@ -146,24 +153,26 @@ lazy val dockerSettings = Seq(
       env("SPARK_HOME", "/spark")
       // Use a volume to persist database between container invocations
       run("mkdir", "-p", "/database")
-      runRaw(
-        s"""
-          |wget http://d3kbcqa49mib13.cloudfront.net/$sparkBuild.tgz && \\
-          |tar -xvf $sparkBuild.tgz && \\
-          |cd $sparkBuild && \\
-          |$sparkBuildCmd && \\
-          |cd .. && \\
-          |mv $sparkBuild/dist /spark && \\
-          |rm $sparkBuild.tgz && \\
-          |rm -r $sparkBuild
-        """.stripMargin.trim
-             )
+//      runRaw(
+//        s"""
+//          |wget http://d3kbcqa49mib13.cloudfront.net/$sparkBuild.tgz && \\
+//          |tar -xvf $sparkBuild.tgz && \\
+//          |cd $sparkBuild && \\
+//          |$sparkBuildCmd && \\
+//          |cd .. && \\
+//          |mv $sparkBuild/dist /spark && \\
+//          |rm $sparkBuild.tgz && \\
+//          |rm -r $sparkBuild
+//        """.stripMargin.trim
+//             )
+      run("mkdir", "-p", "/spark")
+      copy(sparkDist, "/spark")
       volume("/database")
       entryPoint("app/server_start.sh")
     }
   },
   imageNames in docker := Seq(
-    sbtdocker.ImageName(namespace = Some("velvia"),
+    sbtdocker.ImageName(namespace = Some("depend"),
                         repository = "spark-jobserver",
                         tag = Some(
                           s"${version.value}" +

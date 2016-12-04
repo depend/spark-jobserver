@@ -27,7 +27,7 @@ object Dependencies {
     yammerDeps
   )
 
-  val javaVersion = sys.env.getOrElse("JAVA_VERSION", "8-jdk")
+  val javaVersion = sys.env.getOrElse("JAVA_VERSION", "8u112")
 
   val mesosVersion = sys.env.getOrElse("MESOS_VERSION", mesos)
 
