@@ -136,7 +136,7 @@ lazy val dockerSettings = Seq(
 //             """)
       runRaw("""yum install -y ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home:/kalyaka/CentOS_CentOS-6/x86_64/libevent2-2.0.21-11.1.x86_64.rpm && \
                 yum install -y ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home:/kalyaka/CentOS_CentOS-6/x86_64/libevent2-devel-2.0.21-11.1.x86_64.rpm && \
-                rpm -Uvh http://repos.mesosphere.com/el/6/noarch/RPMS/mesosphere-el-repo-6-2.noarch.rpm && \
+                yum -y install http://repos.mesosphere.io/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm && \
                 yum -y install mesos-${MESOS_VERSION}
              """)
       workDir("/")

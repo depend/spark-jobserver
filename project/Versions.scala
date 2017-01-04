@@ -8,7 +8,7 @@ object Versions {
   lazy val spray = "1.3.3"
   lazy val sprayJson = "1.3.2"
   lazy val spark = "2.0.2"
-  lazy val mesos = "1.0.0-2.0.89.centos65"
+  lazy val mesos = "0.28.2-2.0.27.centos701406"
   lazy val netty =  "4.0.29.Final"
   lazy val slick = "3.1.1"
   lazy val h2 = "1.3.176"
