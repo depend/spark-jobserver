@@ -22,12 +22,12 @@ object Dependencies {
     "io.spray" %% "spray-json" % sprayJson,
     "io.spray" %% "spray-can" % spray,
     "io.spray" %% "spray-caching" % spray,
-    "io.spray" %% "spray-routing" % spray,
+    "io.spray" %% "spray-routing-shapeless23" % "1.3.3",
     "io.spray" %% "spray-client" % spray,
     yammerDeps
   )
 
-  val javaVersion = sys.env.getOrElse("JAVA_VERSION", "8u112")
+  val javaVersion = sys.env.getOrElse("JAVA_VERSION", "8u121")
 
   val mesosVersion = sys.env.getOrElse("MESOS_VERSION", mesos)
 
